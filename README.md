@@ -2,7 +2,7 @@
 
 ![Landing do Creator Army no celular](assets/20-lp-celular.jpg)
 
-O Creator Army é o programa de parceiros da 4Life Nutrition para influenciadores e criadores de conteúdo. A plataforma cuida de tudo, do recrutamento ao pagamento: aprova quem entra, dá um cupom para cada creator, apura a comissão de cada venda e organiza as campanhas de produto. Desde outubro de 2026 ela tem domínio, banco, login e deploy próprios, em [creator.4lifenutrition.com.br](https://creator.4lifenutrition.com.br).
+O Creator Army é o programa de parceiros da 4Life Nutrition para influenciadores e criadores de conteúdo. A plataforma cuida de tudo, do recrutamento ao pagamento: aprova quem entra, dá um cupom para cada creator, apura a comissão de cada venda e organiza as campanhas de produto. Desde outubro de 2026 ela tem domínio, banco, login e deploy próprios, em [creator.4lifenutrition.com.br](https://creator.4lifenutrition.com.br), e desde o corte de 12/11/2026 é ela que atende o programa inteiro.
 
 > Repositório vitrine, publicado com autorização do cliente. O código é da 4Life e fica num repositório privado.
 
@@ -12,12 +12,13 @@ Sou o desenvolvedor responsável pela plataforma, do motor de comissão às tela
 
 Os prints foram tirados em 05/11/2026, da versão atual do código (`main`), rodando localmente com o banco de demonstração do próprio repositório: creators, vendas, CPF, chave Pix e endereço são todos inventados. O portal e o painel de verdade têm dados de creators reais e não entram aqui.
 
-| | Situação em 05/11/2026 |
+| | Situação em 23/11/2026 |
 |---|---|
-| Landing | **Em produção** em creator.4lifenutrition.com.br |
-| Cadastro, portal da creator, campanhas e painel da equipe | **Prontos**, testados de ponta a ponta, fechados até o corte |
-| Integração com a loja pela API admin (apuração, cupom, Pix, envio) | **Em desenvolvimento**, num PR ainda aberto |
-| Registro de pagamento pela equipe | Existe só no portal antigo. Na plataforma nova o pagamento é Pix manual, e o saque automático está fora do escopo atual |
+| Plataforma | **Em produção desde 12/11/2026** em creator.4lifenutrition.com.br: landing, cadastro, login com a senha que a creator já usava, portal, cupom próprio, campanhas e painel da equipe |
+| Integração com a loja pela API admin | **Em produção.** A apuração de comissão roda a cada 5 minutos pela API, e o cupom novo nasce como promoção na própria loja |
+| Portal antigo, dentro da loja | **Congelado.** A escrita está fechada e os endereços antigos redirecionam para cá |
+| Pedido de envio das campanhas | Entra com a próxima campanha. Nenhuma estava ativa no corte |
+| Pagamento | Pix manual feito pela equipe. A tela para registrar o pagamento ainda não existe na plataforma nova, e o saque automático está fora do escopo atual |
 
 **Landing.** Feita primeiro para o celular, porque quase todo mundo chega pelo Instagram. Cada tela tem uma ideia só: o cupom que vira comissão, o caminho de uma venda até o painel e o produto que chega em casa nas campanhas. A versão anterior ocupava 15 telas de altura no celular; esta cabe em 7.
 
@@ -52,7 +53,7 @@ Os prints foram tirados em 05/11/2026, da versão atual do código (`main`), rod
 3. Quem é aprovada recebe por e-mail um link que vale 7 dias e só funciona uma vez. Antes de criar a senha, ela confere a chave Pix que vai receber a comissão.
 4. A creator ganha um cupom só dela, conferido contra todos os cupons da loja. O cupom é uma promoção nativa da loja, então o checkout não precisa de nenhum caminho especial. A venda conta para a creator pelo cupom do pedido, sem cookie nem pixel.
 5. Nas campanhas de produto, a equipe escolhe o produto no catálogo da loja e define regras, período e número de vagas. A creator escolhe o sabor, confirma o endereço e se inscreve. Duas inscrições ao mesmo tempo não furam o limite de vagas, e quem não foi selecionada não volta para a fila. Cada participação selecionada vira um pedido de envio com valor zero dentro da loja, sem disparar os e-mails de compra.
-6. No painel, a equipe tem a fila de cadastros, a ficha de cada creator, as comissões em análise e os membros da equipe. O pagamento é um Pix feito pela equipe; no portal antigo ele é registrado no painel, e na plataforma nova essa tela ainda não existe.
+6. No painel, a equipe tem a fila de cadastros, a ficha de cada creator, as comissões em análise e os membros da equipe. O pagamento é um Pix feito pela equipe, e a tela para registrá-lo no painel ainda não existe na plataforma nova.
 
 ## A comissão
 
@@ -119,7 +120,7 @@ flowchart TB
 
 O app novo tem repositório, banco, login e deploy próprios, e nunca abre conexão com o banco da loja. Ele fala com a loja só pela API admin do Medusa, numa lista fechada de 7 rotas: o próprio cliente da API recusa qualquer chamada fora dela, e a chave dedicada da integração nasce restrita a essas rotas. O deploy também é separado: um usuário próprio no servidor que só consegue rodar o script de deploy do programa, com volta automática para a versão anterior se a verificação de saúde falhar.
 
-**Onde a migração está.** A landing nova já roda no domínio próprio. O cadastro, o portal, as campanhas e o painel da equipe estão prontos e testados de ponta a ponta, atrás de uma chave que mantém tudo fechado até o corte. As creators de verdade continuam no portal antigo até lá. A varredura muda só a fonte, da consulta direta para a API, e continua idempotente. Antes do corte ela roda em sombra, recalculando toda comissão ao lado da antiga, e a troca só acontece depois de 7 dias sem nenhuma diferença.
+**Como foi o corte.** Aconteceu em 12/11/2026. Creators, senhas, cupons e comissões vieram da loja numa importação só, ensaiada antes num banco descartável e conferida nos dois lados: contagem, senhas e soma das comissões. Cada creator entra com a senha que já usava na loja. A varredura mudou só a fonte, da consulta direta para a API, e continua idempotente. O plano era deixá-la 7 dias em sombra antes da troca, mas decidi antecipar o corte. No lugar da sombra, a apuração virou uma função pura testada com o formato real da API, medido num pedido de produção, e as comissões importadas foram recalculadas e comparadas antes de a apuração ser ligada. O módulo antigo da loja ficou congelado, com a escrita fechada, e o código dele sai depois de 30 dias.
 
 ## Stack
 
